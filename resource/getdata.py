@@ -4,6 +4,9 @@ import requests
 import json
 
 def get_datastore():
+    # temporary change working dir to work with resource folder
+    working_dir = os.getcwd()
+    os.chdir(os.path.dirname(os.path.realpath(__file__)))
     DATA_SOURCE = 'Sarcasm_Headlines_Dataset.json'
 
     # get Headlines dataset from Kaggle
@@ -14,14 +17,15 @@ def get_datastore():
             zip_path = 'zip_file.zip'
             open(zip_path, 'wb').write(r.content)
             zip = zipfile.ZipFile(zip_path)
-            zip.extractall('.')
+            zip.extractall()
             os.remove(zip_path)
         except Exception as e:
             print(e)
             exit(1)
 
     # process JSON's to be Python dictionaries inside array
-    with open('sarcasm.json', 'w') as new_file:
+    data_file ='sarcasm.json'
+    with open(data_file, 'w') as new_file:
         content = '['
         with open(DATA_SOURCE, 'r') as f:
             while True:
@@ -32,6 +36,9 @@ def get_datastore():
                 content += (next_line[:-1] + ',\n')
         new_file.write(content)
 
-    with open('sarcasm.json', 'r') as f:
+    with open(data_file, 'r') as f:
         datastore = json.load(f)
+
+    # return back working directory
+    os.chdir(working_dir)
     return datastore
