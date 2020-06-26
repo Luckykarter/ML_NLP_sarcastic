@@ -22,7 +22,7 @@ class PreProcess:
                  ):
         self.labels = np.array(labels)
         self.vocab_size = vocab_size
-        self.embedding_dim = embedding_dim,
+        self.embedding_dim = embedding_dim
         self.max_length = max_length
         self.trunc_type = trunc_type
         self.padding_type = padding_type
@@ -59,14 +59,14 @@ class PreProcess:
         return np.array(padded)
 
     def get_keras_model(self):
-        model = tf.keras.Sequential(
+        model = tf.keras.Sequential([
             tf.keras.layers.Embedding(self.vocab_size,
                                           self.embedding_dim,
                                           input_length=self.max_length),
             tf.keras.layers.GlobalAveragePooling1D(),
             tf.keras.layers.Dense(24, activation=tf.nn.relu),
             tf.keras.layers.Dense(1, activation=tf.nn.sigmoid)
-        )
+        ])
         model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
         return model
 
