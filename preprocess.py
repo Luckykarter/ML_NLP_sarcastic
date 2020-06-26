@@ -76,7 +76,7 @@ class PreProcess:
         self.history = self.model.fit(self.train_data, self.train_labels, epochs=num_epochs,
                                       validation_data=(self.test_data, self.test_labels),
                                       verbose=1)
-        tf.keras.models.save_model(self.model_file)
+        self.model.save(self.model_file)
 
     def plot_graphs(self):
         if not self.history:
