@@ -46,7 +46,7 @@ class PreProcess:
             self.model = tf.keras.models.load_model(model_file)
             self.history = None
         else:
-            self.model = self.get_keras_model()
+            self.get_keras_model()
             self.train_model(train_epochs)
 
     # return always padded sequences
@@ -59,7 +59,7 @@ class PreProcess:
         return np.array(padded)
 
     def get_keras_model(self):
-        model = tf.keras.Sequential([
+        self.model = tf.keras.Sequential([
             tf.keras.layers.Embedding(self.vocab_size,
                                       self.embedding_dim,
                                       input_length=self.max_length),
@@ -68,9 +68,8 @@ class PreProcess:
             tf.keras.layers.Dense(24, activation=tf.nn.relu),
             tf.keras.layers.Dense(1, activation=tf.nn.sigmoid)
         ])
-        model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
-        model.summary()
-        return model
+        self.model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
+        self.model.summary()
 
     def train_model(self, num_epochs):
         self.history = self.model.fit(self.train_data, self.train_labels, epochs=num_epochs,
