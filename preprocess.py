@@ -108,4 +108,4 @@ class PreProcess:
         out_m.close()
 
     def predict(self, sentence):
-        print(self.model.predict(self.get_sequences(sentence)))
+        return self.model.predict(self.get_sequences(sentence))
