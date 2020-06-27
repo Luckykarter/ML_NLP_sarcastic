@@ -5,8 +5,7 @@ import numpy as np
 import os
 import matplotlib.pyplot as plt
 import io
-
-
+import pickle
 
 
 class PreProcess:
@@ -36,6 +35,7 @@ class PreProcess:
             MODEL_TYPES
         )
         self.model_file = model_type + '_model.h5'
+        self.history_file = model_type + '_history'
 
         # part of sentences that used for training
         training_size = int(training_size * len(sentences))
@@ -61,6 +61,8 @@ class PreProcess:
             print('Use pre-saved model: ', os.path.abspath(self.model_file))
             self.model = tf.keras.models.load_model(self.model_file)
             self.history = None
+            if os.path.exists(self.history_file):
+                self.history = pickle.load(open(self.history_file, 'rb'))
         else:
             self.get_keras_model()
             self.train_model(train_epochs)
@@ -99,18 +101,22 @@ class PreProcess:
         self.model.summary()
 
     def train_model(self, num_epochs):
-        self.history = self.model.fit(self.train_data, self.train_labels, epochs=num_epochs,
-                                      validation_data=(self.test_data, self.test_labels),
-                                      verbose=1)
+        history = self.model.fit(self.train_data, self.train_labels, epochs=num_epochs,
+                                 validation_data=(self.test_data, self.test_labels),
+                                 verbose=1)
+
+        self.history = history.history
         self.model.save(self.model_file)
+        with open(self.history_file, 'wb') as file:
+            pickle.dump(self.history, file)
 
     def plot_graphs(self):
         if not self.history:
             print('No history for saved model')
             return
         for par in ('accuracy', 'loss'):
-            plt.plot(self.history.history[par])
-            plt.plot(self.history.history['val_' + par])
+            plt.plot(self.history[par])
+            plt.plot(self.history['val_' + par])
             plt.xlabel('Epochs')
             plt.ylabel(par)
             plt.legend([par, 'val_' + par])
