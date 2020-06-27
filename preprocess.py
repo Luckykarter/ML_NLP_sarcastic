@@ -66,6 +66,7 @@ class PreProcess:
         else:
             self.get_keras_model()
             self.train_model(train_epochs)
+        self.model.summary()
 
     # return always padded sequences
     def get_sequences(self, sentences):
@@ -98,7 +99,6 @@ class PreProcess:
         self.model.add(tf.keras.layers.Dense(1, activation=tf.nn.sigmoid))
 
         self.model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
-        self.model.summary()
 
     def train_model(self, num_epochs):
         history = self.model.fit(self.train_data, self.train_labels, epochs=num_epochs,
