@@ -14,7 +14,7 @@ class PreProcess:
                  vocab_size=10000,
                  embedding_dim=16,
                  max_length=100,
-                 training_size=20000,
+                 training_size=1,
                  trunc_type='post',
                  padding_type='post',
                  oov_token='<OOV>',
@@ -29,12 +29,19 @@ class PreProcess:
         self.padding_type = padding_type
         self.model_file = model_file
 
+        # part of sentences that used for training
+        training_size = int(training_size * len(sentences))
+
         # initialize tokenizer OOV - out of vocabulary
         self.tokenizer = Tokenizer(num_words=vocab_size, oov_token=oov_token)
         # fit once during initialization - tokenize sentences (split into words)
         self.tokenizer.fit_on_texts(sentences[0:training_size])
         self.train_data = self.get_sequences(sentences[0:training_size])
         self.test_data = self.get_sequences(sentences[training_size:])
+
+        print('{} training sentences\n{} validation sentences'.format(
+            len(self.train_data), len(self.test_data)
+        ))
 
         self.train_labels = np.array(labels[0:training_size])
         self.test_labels = np.array(labels[training_size:])
@@ -43,6 +50,7 @@ class PreProcess:
                                         (key, value) in self.tokenizer.word_index.items()])
 
         if os.path.exists(model_file):
+            print('Use pre-saved model: ', os.path.abspath(model_file))
             self.model = tf.keras.models.load_model(model_file)
             self.history = None
         else:

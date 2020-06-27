@@ -1,16 +1,23 @@
 from resource.getdata import get_datastore
 from preprocess import PreProcess
 
+"""
+This is an example of binary neural network that
+recognizes sentiment of the sentence - if the sentence
+is sarcastic or not. Input data is in format of two arrays
+that contain sentences and labels.
+Sentences then can be split between training and validation
+data using parameter training_size of PreProcess class
+"""
+
 sentences = []
 labels = []
-urls = []
 
 datastore = get_datastore()
 # split JSON into lists
 for item in datastore:
     sentences.append(item['headline'])
     labels.append(item['is_sarcastic'])
-    urls.append(item['article_link'])
 
 p = PreProcess(sentences, labels,
                vocab_size=10000,
@@ -19,7 +26,7 @@ p = PreProcess(sentences, labels,
                trunc_type='post',
                padding_type='post',
                oov_token='<OOV>',
-               training_size=20000,
+               training_size=0.5,
                train_epochs=30)
 
 p.plot_graphs()
