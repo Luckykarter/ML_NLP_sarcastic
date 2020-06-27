@@ -27,7 +27,8 @@ p = PreProcess(sentences, labels,
                padding_type='post',
                oov_token='<OOV>',
                training_size=0.5,
-               train_epochs=30)
+               train_epochs=30,
+               model_type='embed')
 
 p.plot_graphs()
 p.save_vectors()

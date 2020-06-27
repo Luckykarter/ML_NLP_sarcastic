@@ -7,7 +7,10 @@ import matplotlib.pyplot as plt
 import io
 
 
+
+
 class PreProcess:
+
     def __init__(self,
                  sentences,
                  labels,
@@ -19,15 +22,20 @@ class PreProcess:
                  padding_type='post',
                  oov_token='<OOV>',
                  train_epochs=30,
-                 model_file='keras_model.h5'
+                 model_type='embed'
                  ):
+        MODEL_TYPES = ('embed', 'lstm', 'conv', 'gru')
         # self.labels = np.array(labels)
         self.vocab_size = vocab_size
         self.embedding_dim = embedding_dim
         self.max_length = max_length
         self.trunc_type = trunc_type
         self.padding_type = padding_type
-        self.model_file = model_file
+        self.model_type = model_type.lower()
+        assert self.model_type in MODEL_TYPES, 'Unknown type of model. Possible types:\n{}'.format(
+            MODEL_TYPES
+        )
+        self.model_file = model_type + '_model.h5'
 
         # part of sentences that used for training
         training_size = int(training_size * len(sentences))
@@ -49,9 +57,9 @@ class PreProcess:
         self.reverse_word_index = dict([(value, key) for
                                         (key, value) in self.tokenizer.word_index.items()])
 
-        if os.path.exists(model_file):
-            print('Use pre-saved model: ', os.path.abspath(model_file))
-            self.model = tf.keras.models.load_model(model_file)
+        if os.path.exists(self.model_file):
+            print('Use pre-saved model: ', os.path.abspath(self.model_file))
+            self.model = tf.keras.models.load_model(self.model_file)
             self.history = None
         else:
             self.get_keras_model()
@@ -67,15 +75,26 @@ class PreProcess:
         return np.array(padded)
 
     def get_keras_model(self):
+
         self.model = tf.keras.Sequential([
             tf.keras.layers.Embedding(self.vocab_size,
                                       self.embedding_dim,
-                                      input_length=self.max_length),
-            # tf.keras.layers.Flatten(),
-            tf.keras.layers.GlobalAveragePooling1D(),
-            tf.keras.layers.Dense(24, activation=tf.nn.relu),
-            tf.keras.layers.Dense(1, activation=tf.nn.sigmoid)
+                                      input_length=self.max_length)
         ])
+
+        if self.model_type == 'embed':
+            self.model.add(tf.keras.layers.GlobalAveragePooling1D())
+        elif self.model_type == 'gru':
+            self.model.add(tf.keras.layers.GRU(32))
+        elif self.model_type == 'lstm':
+            self.model.add(tf.keras.layers.LSTM(32))
+        elif self.model_type == 'conv':
+            self.model.add(tf.keras.layers.Conv1D(128, 5, activation=tf.nn.relu))
+            self.model.add(tf.keras.layers.GlobalAveragePooling1D())
+
+        self.model.add(tf.keras.layers.Dense(24, activation=tf.nn.relu))
+        self.model.add(tf.keras.layers.Dense(1, activation=tf.nn.sigmoid))
+
         self.model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
         self.model.summary()
 
