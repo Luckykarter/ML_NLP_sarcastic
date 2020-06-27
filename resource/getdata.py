@@ -7,14 +7,14 @@ def get_datastore():
     # temporary change working dir to work with resource folder
     working_dir = os.getcwd()
     os.chdir(os.path.dirname(os.path.realpath(__file__)))
-    DATA_FILE = 'sarcasm.json'
-    if not os.path.exists(DATA_FILE):
-        DATA_SOURCE = 'Sarcasm_Headlines_Dataset.json'
+    data_file = 'sarcasm.json'
+    if not os.path.exists(data_file):
+        data_source = 'Sarcasm_Headlines_Dataset.json'
         # get Headlines dataset from Kaggle
-        if not os.path.exists(DATA_SOURCE):
+        if not os.path.exists(data_source):
             try:
-                URL = open('dataseturl.txt', 'r').read()
-                r = requests.get(URL, allow_redirects=True)
+                url = open('dataseturl.txt', 'r').read()
+                r = requests.get(url, allow_redirects=True)
                 zip_path = 'zip_file.zip'
                 open(zip_path, 'wb').write(r.content)
                 zip = zipfile.ZipFile(zip_path)
@@ -26,9 +26,9 @@ def get_datastore():
 
         # process JSON's to be Python dictionaries inside array
 
-        with open(DATA_FILE, 'w') as new_file:
+        with open(data_file, 'w') as new_file:
             content = '['
-            with open(DATA_SOURCE, 'r') as f:
+            with open(data_source, 'r') as f:
                 while True:
                     next_line = f.readline()
                     if not next_line:
@@ -37,7 +37,7 @@ def get_datastore():
                     content += (next_line[:-1] + ',\n')
             new_file.write(content)
 
-    with open(DATA_FILE, 'r') as f:
+    with open(data_file, 'r') as f:
         datastore = json.load(f)
 
     # return back working directory
